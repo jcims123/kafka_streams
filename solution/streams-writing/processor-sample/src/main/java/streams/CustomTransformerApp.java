@@ -47,7 +47,7 @@ public class CustomTransformerApp {
     builder.stream("lines-topic", Consumed.with(Serdes.String(), Serdes.String()))
         .flatMapValues(line -> Arrays.asList(line.toLowerCase(Locale.getDefault()).split(" ")))
         .selectKey((k, word) -> word)
-        .through("lines-topic-repartition", Produced.with(Serdes.String(), Serdes.String()))
+        .repartition(Repartitioned.with(Serdes.String(), Serdes.String()))
         .transform(WordCountTransformer::new, storeBuilder.name())
         .to("word-count-topic", Produced.with(Serdes.String(), Serdes.Long()));
 
