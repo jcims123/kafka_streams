@@ -1,21 +1,22 @@
 plugins {
-  id 'java'
-  id 'application'
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.2.0'
+    id 'java'
+    id 'application'
 }
 
 mainClassName = 'streams.MapSample'
 
 applicationDefaultJvmArgs = [
-    "-Dcom.sun.management.jmxremote",
-    "-Dcom.sun.management.jmxremote.authenticate=false",
-    "-Dcom.sun.management.jmxremote.ssl=false",
-    "-Djava.rmi.server.hostname=127.0.0.1",
-    "-Dcom.sun.management.jmxremote.rmi.port=4444",
-    "-Dcom.sun.management.jmxremote.port=4444"]
+        "-Dcom.sun.management.jmxremote",
+        "-Dcom.sun.management.jmxremote.authenticate=false",
+        "-Dcom.sun.management.jmxremote.ssl=false",
+        "-Djava.rmi.server.hostname=127.0.0.1",
+        "-Dcom.sun.management.jmxremote.rmi.port=4444",
+        "-Dcom.sun.management.jmxremote.port=4444"]
 
 repositories {
     mavenCentral()
-    maven { url "http://packages.confluent.io/maven/" }
+    maven { url 'https://packages.confluent.io/maven/' }
 }
 
 jar {
@@ -26,8 +27,21 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 dependencies {
-    compile group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.30"
-    compile group: "org.apache.kafka", name: "kafka-clients", version: "2.6.0"
-    compile group: "org.apache.kafka", name: "kafka-streams", version: "2.6.0"
+    implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '2.6.0'
+    implementation group: "org.apache.kafka", name: "kafka-streams", version: "2.6.0"
+    implementation group: "io.confluent", name: "kafka-streams-avro-serde", version: "6.0.0"
+    implementation group: "io.confluent", name: "monitoring-interceptors", version: '6.0.0'
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.30'
+    implementation group: 'net.sf.geographiclib', name: 'GeographicLib-Java', version: '1.50'
+
+    implementation group: 'org.apache.avro', name: 'avro', version: '1.9.1'
+    implementation group: 'org.apache.avro', name: 'avro-tools', version: '1.9.1'
+    implementation group: 'io.confluent', name: 'kafka-avro-serializer', version: '6.0.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
+test {
+    useJUnitPlatform()
+}
