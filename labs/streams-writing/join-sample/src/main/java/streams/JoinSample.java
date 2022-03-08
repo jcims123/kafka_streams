@@ -35,13 +35,23 @@ public class JoinSample {
         final Serde<String> stringSerde = Serdes.String();
 
         // TODO: here we construct the Kafka Streams topology
+        KStream<String, String> leftStream = builder.stream( "left-topic", Consumed.with(stringSerde, stringSerde) );
+        KStream<String, String> rightStream = builder.stream( "right-topic", Consumed.with(stringSerde, stringSerde) );
+        leftStream.join( rightStream
+                    , (leftValue, rightValue) -> "[" + leftValue + ", " + rightValue + "]"
+                    , JoinWindows.of(Duration.ofMinutes( 5 ))
+                    , StreamJoined.with(stringSerde, stringSerde, stringSerde) )
+                .to("joined-topic", Produced.with(stringSerde, stringSerde));
+
+        Topology topology = builder.build();
+        return topology;
 
     }
 
     private static Properties getConfig(){
         Properties settings = new Properties();
         settings.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
-        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:19092");
         return settings;        
     }
 

@@ -16,6 +16,7 @@ def main():
     consume_lowercase_quotes()
     print("<<< Ending Python Kafka Client...")
 
+
 # Initialization
 quotes = [
     "Kafka enables the Confluent Streaming Platform",
@@ -27,6 +28,7 @@ quotes = [
 output_topic = "quotes"
 input_topic = "QUOTES_LOWER"
 bootstrap_servers = "kafka:9092"
+
 
 # Function Definitions
 
@@ -52,22 +54,25 @@ def call_ksql():
     post_expression(ksql)
     print("\n--------- done posting to KSQL Server -----------\n")
 
+
 def post_expression(ksql):
     headers = {
         "accept": "application/vnd.ksql.v1+json",
         "content-type": "application/vnd.ksql.v1+json"
-        }
+    }
     data = {
         "ksql": ksql,
         "streamsProperties": {"ksql.streams.auto.offset.reset": "earliest"}
     }
+    r = None
     try:
-        r = requests.post("http://ksqldb-server:8088/ksql", json = data, headers=headers)
-    except:
-        print("ERROR: " + str(r.status_code) + ", " + r.text)
+        r = requests.post("http://ksqldb-server:8088/ksql", json=data, headers=headers)
+    except Exception as e:
+        print("ERROR: " + str(r.status_code) + ", " + r.text + ", " + str(e))
         raise
     print(str(r.status_code) + ", " + r.text + ",\n")
- 
+
+
 def consume_lowercase_quotes():
     print("------ Reading from topic '" + input_topic + "' ------")
     consumer = Consumer({
@@ -78,7 +83,7 @@ def consume_lowercase_quotes():
         }
     })
     consumer.subscribe([input_topic])
-    i=0
+    i = 0
     while i < 5:
         msg = consumer.poll(1.0)
 
