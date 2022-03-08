@@ -13,6 +13,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import io.confluent.kafka.serializers.KafkaJsonSerializer;
 import io.confluent.kafka.serializers.KafkaJsonDeserializer;
@@ -52,19 +53,32 @@ public class JsonSample {
         final Serde<TempReading> temperatureSerde = getJsonSerde();
 
         // TODO: here we construct the Kafka Streams topology
+        builder.stream("temperatures-topic", Consumed.with(stringSerde, temperatureSerde))
+                .filter((key, value) -> value.temperature > 25)
+                .to("high-temperatures-topic", Produced.with(stringSerde, temperatureSerde));
 
+        Topology topology = builder.build();
+        return topology;
     }
 
     private static Serde<TempReading> getJsonSerde(){
-        
-        // TODO: create a JSON serde for the TempReading class using KafkaJson serdes
 
+        // TODO: create a JSON serde for the TempReading class using KafkaJson serdes
+        Map<String, Object> serdeProps = new HashMap<>();
+        serdeProps.put("json.value.type", TempReading.class);
+
+        final Serializer<TempReading> temperatureSerializer = new KafkaJsonSerializer<>();
+        temperatureSerializer.configure(serdeProps, false);
+        final Deserializer<TempReading> temperatureDeserializer = new KafkaJsonDeserializer<>();
+        temperatureDeserializer.configure( serdeProps, false );
+
+        return Serdes.serdeFrom( temperatureSerializer, temperatureDeserializer );
     }
 
     private static Properties getConfig(){
         Properties settings = new Properties();
         settings.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
-        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:19092");
         return settings;        
     }
 
